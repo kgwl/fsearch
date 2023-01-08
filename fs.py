@@ -4,6 +4,10 @@ import argparse
 
 
 def parse_args():
+    """
+    Parse command line arguments
+    """
+
     parser = argparse.ArgumentParser(
         description='Search string in all files in directory'
     )
@@ -18,8 +22,17 @@ def parse_args():
 
 
 def get_dirlist(directory: str):
+    """
+    Get all filenames in given directory
+
+    Parameters
+    ----------
+    directory : str
+        Path to the directory to search.
+    """
+
     path = os.path.abspath(directory)
-    fs_dir_list_name = '/tmp/fsdirlist' + str(time.time_ns()) + '.txt'
+    fs_dir_list_name = '/tmp/fslist' + str(time.time_ns()) + '.txt'
     dir_list = []
     command = 'du -a ' + path + '| grep -o "/.*" > ' + fs_dir_list_name
     os.system(command)
@@ -36,6 +49,7 @@ def get_dirlist(directory: str):
 
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()
