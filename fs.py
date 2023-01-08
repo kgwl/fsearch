@@ -1,5 +1,20 @@
 import os
 import time
+import argparse
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Search string in all files in directory'
+    )
+    parser.add_argument(
+        '-d',
+        '--dir',
+        default='.',
+        help='Path to the directory to search (default: %(default)s)'
+    )
+    args = parser.parse_args()
+    return args
 
 
 def get_dirlist(directory: str):
