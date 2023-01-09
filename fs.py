@@ -1,5 +1,4 @@
 import os
-import time
 import argparse
 
 
@@ -32,18 +31,13 @@ def get_dirlist(directory: str):
     """
 
     path = os.path.abspath(directory)
-    fs_dir_list_name = '/tmp/fslist' + str(time.time_ns()) + '.txt'
     dir_list = []
-    command = 'du -a ' + path + '| grep -o "/.*" > ' + fs_dir_list_name
-    os.system(command)
-    file = open(fs_dir_list_name)
-    for line in file.readlines():
-        line = line.replace('\n', '')
-        line = line.replace(' ', '\\ ')
-        if not os.path.isdir(line):
-            dir_list.append(line)
-    file.close()
-    os.remove(fs_dir_list_name)
+
+    for path, currentDirectory, files in os.walk(path):
+        for file in files:
+            result = os.path.join(path, file)
+            dir_list.append(result)
+
     return dir_list
 
 
