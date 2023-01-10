@@ -41,6 +41,25 @@ def get_dirlist(directory: str):
     return dir_list
 
 
+def string_file(path: str):
+    """
+    Return all printable characters from file.
+
+    Parameters
+    ----------
+    path : str
+        Path to the file
+    """
+    file = open(path, 'rb')
+    result = ''
+    for x in file.read():
+        if x < 128:
+            char = chr(x)
+            if char.isprintable():
+                result += char
+    return result
+
+
 def main():
     pass
 
