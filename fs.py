@@ -5,6 +5,10 @@ import argparse
 def parse_args():
     """
     Parse command line arguments
+
+    --------
+    Returns:
+        argparse: Command line arguments
     """
 
     parser = argparse.ArgumentParser(
@@ -24,10 +28,14 @@ def get_dirlist(directory: str):
     """
     Get all filenames in given directory
 
-    Parameters
+    Parameters:
     ----------
-    directory : str
+    directory: str
         Path to the directory to search.
+
+    --------
+    Returns:
+        list: All paths to files in a given directory and subdirectories recursively
     """
 
     path = os.path.abspath(directory)
@@ -45,10 +53,14 @@ def string_file(path: str):
     """
     Return all printable characters from file.
 
-    Parameters
+    Parameters:
     ----------
     path : str
-        Path to the file
+        Path to the file.
+
+    --------
+    Returns:
+        list: All printable characters in file. Every line is a single element of the list.
     """
     file = open(path,'rb')
     output = []
