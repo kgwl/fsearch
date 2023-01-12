@@ -50,14 +50,17 @@ def string_file(path: str):
     path : str
         Path to the file
     """
-    file = open(path, 'rb')
-    result = ''
-    for x in file.read():
-        if x < 128:
-            char = chr(x)
+    file = open(path,'rb')
+    output = []
+    for line in file.readlines():
+        result = ''
+        for character in line:
+            char = chr(character)
             if char.isprintable():
                 result += char
-    return result
+        output.append(result)
+
+    return output
 
 
 def main():
