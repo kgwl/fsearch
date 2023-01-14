@@ -1,5 +1,6 @@
 import os
 import argparse
+import re
 
 
 def parse_args():
@@ -62,7 +63,7 @@ def string_file(path: str):
     Returns:
         list: All printable characters in file. Every line is a single element of the list.
     """
-    file = open(path,'rb')
+    file = open(path, 'rb')
     output = []
     for line in file.readlines():
         result = ''
@@ -73,6 +74,36 @@ def string_file(path: str):
         output.append(result)
 
     return output
+
+
+def search(pattern: str, line: str):
+    """
+    Returns line that contains given pattern. By default, the search pattern is displayed in red
+
+    Parameters:
+    ----------
+    pattern : str
+        The pattern that is looked for
+
+    line : str
+        Searched text
+
+    --------
+    Returns:
+        str: If the pattern was found, return line with red-colored pattern.
+    """
+    result = re.search(pattern, line)
+
+    if result is not None:
+        positions = re.finditer(pattern, line)
+        positions = [m.start() for m in positions]
+        pattern_length = len(pattern)
+        index = 0
+        output = ''
+        for position in positions:
+            output += line[index: position] + '\033[91m' + line[position: position + pattern_length] + '\033[0m'
+            index = position + pattern_length
+        return output
 
 
 def main():
