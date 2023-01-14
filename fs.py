@@ -105,6 +105,7 @@ def search(pattern: str, line: str):
         for position in positions:
             output += line[index: position] + '\033[91m' + line[position: position + pattern_length] + '\033[0m'
             index = position + pattern_length
+        output += line[index:]
         return output
 
 

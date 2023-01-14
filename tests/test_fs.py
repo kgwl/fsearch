@@ -6,7 +6,7 @@ import fs
 class TestFSearch(unittest.TestCase):
 
     def setUp(self):
-        self.path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_string_file.txt')
+        self.path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_fsearch_input.txt')
         self.output = fs.string_file(self.path)
 
     def test_string_file_type(self):
@@ -29,3 +29,18 @@ class TestFSearch(unittest.TestCase):
         output = fs.string_file(path)
         self.assertEqual(output[0], string1)
         self.assertEqual(output[1], string2)
+
+    def test_search_output_colored(self):
+        pattern = 'faucibus mi quis dui'
+        excepted_result = 'Phasellus ' \
+                          + '\033[91m' + 'faucibus mi quis dui' \
+                          + '\033[0m' + ' ultrices tristique. ' \
+                                        'Morbi efficitur leo felis, sit ' \
+                                        'amet fringilla ante iaculis ut.'
+        result = ''
+        for line in self.output:
+            searched_phrase = fs.search(pattern, line)
+            if searched_phrase is not None:
+                result = searched_phrase
+
+        self.assertEqual(result, excepted_result)
