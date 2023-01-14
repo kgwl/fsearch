@@ -73,6 +73,8 @@ def string_file(path: str):
                 result += char
         output.append(result)
 
+    file.close()
+
     return output
 
 
