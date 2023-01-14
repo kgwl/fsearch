@@ -21,3 +21,11 @@ class TestFSearch(unittest.TestCase):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_printable_characters.txt')
         output = fs.string_file(path)[0]
         self.assertEqual(output, printable_characters)
+
+    def test_string_file_non_printable_characters(self):
+        string1 = 'test'
+        string2 = '123'
+        path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_non_printable_characters.txt')
+        output = fs.string_file(path)
+        self.assertEqual(output[0], string1)
+        self.assertEqual(output[1], string2)
