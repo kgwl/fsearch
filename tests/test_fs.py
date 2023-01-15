@@ -1,9 +1,10 @@
 import os
-import unittest
+from unittest import TestCase
+from unittest.mock import patch
 import fs
 
 
-class TestFSearch(unittest.TestCase):
+class TestFSearch(TestCase):
 
     def setUp(self):
         self.path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_fsearch_input.txt')
@@ -44,3 +45,18 @@ class TestFSearch(unittest.TestCase):
                 result = searched_phrase
 
         self.assertEqual(result, excepted_result)
+
+    @patch('os.walk')
+    def test_get_dirlist_walk_call(self, mock_system):
+        fs.get_dirlist('.')
+        mock_system.assert_called()
+
+    @patch('os.path.abspath')
+    def test_get_dirlist_path_call(self, mock_system):
+        fs.get_dirlist('.')
+        mock_system.assert_called()
+
+    def test_get_dirlist_output(self):
+        path = os.path.join(os.path.dirname(__file__), 'test_input_files')
+        dirlist = fs.get_dirlist(path)
+        self.assertEqual(type(dirlist), list)
