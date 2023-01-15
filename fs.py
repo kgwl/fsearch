@@ -21,6 +21,11 @@ def parse_args():
         default='.',
         help='Path to the directory to search (default: %(default)s)'
     )
+
+    parser.add_argument(
+        'pattern',
+        help='Pattern that is looked for'
+    )
     args = parser.parse_args()
     return args
 
@@ -129,7 +134,20 @@ def is_hidden(file_path: str):
 
 
 def main():
-    pass
+    parser = parse_args()
+    dirlist = get_dirlist(parser.dir)
+    for path in dirlist:
+        file = string_file(path)
+        output = []
+        for line in file:
+            result = search(parser.pattern, line)
+            if result is not None:
+                output.append(result)
+
+        if len(output) > 0:
+            print('\033[93m' + '\33[1m' + path + '\033[0m')
+        for line in output:
+            print('     ', line)
 
 
 if __name__ == '__main__':
