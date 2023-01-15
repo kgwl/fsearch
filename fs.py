@@ -25,7 +25,7 @@ def parse_args():
     return args
 
 
-def get_dirlist(directory: str):
+def get_dirlist(directory: str, hidden: int = 0):
     """
     Get all filenames in given directory
 
@@ -42,10 +42,12 @@ def get_dirlist(directory: str):
     path = os.path.abspath(directory)
     dir_list = []
 
-    for path, currentDirectory, files in os.walk(path):
+    for root, currentDirectory, files in os.walk(path):
         for file in files:
-            result = os.path.join(path, file)
+            result = os.path.join(root, file)
             dir_list.append(result)
+            if is_hidden(result) and hidden == 0:
+                dir_list.remove(result)
 
     return dir_list
 
@@ -107,6 +109,23 @@ def search(pattern: str, line: str):
             index = position + pattern_length
         output += line[index:]
         return output
+
+
+def is_hidden(file_path: str):
+    """
+    Checks if the given directory or file is hidden. Function searches if the given path contains files with prefix '.'
+
+    Parameters:
+    ----------
+    file_path : str
+        path to the file or directory
+
+    --------
+    Returns:
+        bool: True if path contains prefix. (file is hidden)
+    """
+
+    return re.search('/\.', file_path) is not None
 
 
 def main():

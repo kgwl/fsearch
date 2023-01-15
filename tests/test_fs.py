@@ -60,3 +60,11 @@ class TestFSearch(TestCase):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files')
         dirlist = fs.get_dirlist(path)
         self.assertEqual(type(dirlist), list)
+
+    def test_is_hidden_false(self):
+        path = '/home/foo/test.txt'
+        self.assertFalse(fs.is_hidden(path))
+
+    def test_is_hidden_true(self):
+        path = '/home/.foo/test.txt'
+        self.assertTrue(fs.is_hidden(path))
