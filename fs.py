@@ -26,6 +26,13 @@ def parse_args():
         'pattern',
         help='Pattern that is looked for'
     )
+
+    parser.add_argument(
+        '-i',
+        '--ignore',
+        action='store_true'
+    )
+
     args = parser.parse_args()
     return args
 
@@ -106,9 +113,8 @@ def search(pattern: str, line: str, case_sensitive: bool = False):
     """
 
     result = re.search(pattern, line, re.IGNORECASE) if case_sensitive else re.search(pattern, line)
-
     if result is not None:
-        positions = re.finditer(pattern, line)
+        positions = re.finditer(pattern, line, re.IGNORECASE) if case_sensitive else re.finditer(pattern, line)
         positions = [m.start() for m in positions]
         pattern_length = len(pattern)
         index = 0
@@ -144,7 +150,7 @@ def main():
         file = string_file(path)
         output = []
         for line in file:
-            result = search(parser.pattern, line)
+            result = search(parser.pattern, line, parser.ignore)
             if result is not None:
                 output.append(result)
 
