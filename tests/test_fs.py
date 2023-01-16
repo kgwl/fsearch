@@ -4,6 +4,19 @@ from unittest.mock import patch
 import fs
 
 
+def search_case_sensitive(switch):
+    path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_case_sensitive.txt')
+    dirlist = fs.get_dirlist(path)
+    file = fs.string_file(dirlist[0])
+    pattern = 'test'
+    cnt_lines = 0
+    for line in file:
+        result = fs.search(pattern, line, switch)
+        if result is not None:
+            cnt_lines += 1
+    return cnt_lines
+
+
 class TestFSearch(TestCase):
 
     def setUp(self):
@@ -46,6 +59,12 @@ class TestFSearch(TestCase):
 
         self.assertEqual(result, excepted_result)
 
+    def test_search_case_sensitive_false(self):
+        self.assertEqual(search_case_sensitive(False), 1)
+
+    def test_search_case_sensitive_true(self):
+        self.assertEqual(search_case_sensitive(True), 2)
+
     @patch('os.walk')
     def test_get_dirlist_walk_call(self, mock_system):
         fs.get_dirlist('.')
@@ -59,7 +78,7 @@ class TestFSearch(TestCase):
     def test_get_dirlist_single_file(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_fsearch_input.txt')
         dirlist = fs.get_dirlist(path)
-        self.assertEqual(dirlist[0],path)
+        self.assertEqual(dirlist[0], path)
 
     def test_get_dirlist_output(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files')

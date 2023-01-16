@@ -88,7 +88,7 @@ def string_file(path: str):
     return output
 
 
-def search(pattern: str, line: str):
+def search(pattern: str, line: str, case_sensitive: bool = False):
     """
     Returns line that contains given pattern. By default, the search pattern is displayed in red
 
@@ -104,7 +104,8 @@ def search(pattern: str, line: str):
     Returns:
         str: If the pattern was found, return line with red-colored pattern.
     """
-    result = re.search(pattern, line)
+
+    result = re.search(pattern, line, re.IGNORECASE) if case_sensitive else re.search(pattern, line)
 
     if result is not None:
         positions = re.finditer(pattern, line)
