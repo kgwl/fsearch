@@ -56,6 +56,11 @@ class TestFSearch(TestCase):
         fs.get_dirlist('.')
         mock_system.assert_called()
 
+    def test_get_dirlist_single_file(self):
+        path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_fsearch_input.txt')
+        dirlist = fs.get_dirlist(path)
+        self.assertEqual(dirlist[0],path)
+
     def test_get_dirlist_output(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files')
         dirlist = fs.get_dirlist(path)

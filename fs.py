@@ -47,12 +47,15 @@ def get_dirlist(directory: str, hidden: int = 0):
     path = os.path.abspath(directory)
     dir_list = []
 
-    for root, currentDirectory, files in os.walk(path):
-        for file in files:
-            result = os.path.join(root, file)
-            dir_list.append(result)
-            if is_hidden(result) and hidden == 0:
-                dir_list.remove(result)
+    if os.path.isdir(path):
+        for root, currentDirectory, files in os.walk(path):
+            for file in files:
+                result = os.path.join(root, file)
+                dir_list.append(result)
+                if is_hidden(result) and hidden == 0:
+                    dir_list.remove(result)
+    else:
+        dir_list.append(path)
 
     return dir_list
 
