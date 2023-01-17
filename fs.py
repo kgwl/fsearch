@@ -116,7 +116,7 @@ def search(pattern: str, line: str, case_sensitive: bool = False):
     if result is not None:
         positions = re.finditer(pattern, line, re.IGNORECASE) if case_sensitive else re.finditer(pattern, line)
         positions = [m.start() for m in positions]
-        pattern_length = len(pattern)
+        pattern_length = len(pattern) if len(positions) == 1 else 1
         index = 0
         output = ''
         for position in positions:

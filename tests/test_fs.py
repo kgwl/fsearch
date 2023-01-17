@@ -65,6 +65,18 @@ class TestFSearch(TestCase):
     def test_search_case_sensitive_true(self):
         self.assertEqual(search_case_sensitive(True), 2)
 
+    def test_search_regular_expressions(self):
+        path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_case_sensitive.txt')
+        dirlist = fs.get_dirlist(path)
+        file = fs.string_file(dirlist[0])
+        pattern = '[1-5]'
+        expected_output_line_1 = b'test\x1b[91m1\x1b[0m\x1b[91m2\x1b[0m\x1b[91m3\x1b[0m'.decode('utf-8')
+        expected_output_line_2 = b'TEST\x1b[91m4\x1b[0m\x1b[91m5\x1b[0m6'.decode('utf-8')
+        result_1 = fs.search(pattern, file[0])
+        result_2 = fs.search(pattern, file[1])
+        self.assertEqual(result_1, expected_output_line_1)
+        self.assertEqual(result_2, expected_output_line_2)
+
     @patch('os.walk')
     def test_get_dirlist_walk_call(self, mock_system):
         fs.get_dirlist('.')
