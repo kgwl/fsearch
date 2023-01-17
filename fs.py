@@ -30,7 +30,8 @@ def parse_args():
     parser.add_argument(
         '-i',
         '--ignore',
-        action='store_true'
+        action='store_true',
+        help='Ignore case distinctions in patterns and data'
     )
 
     args = parser.parse_args()
@@ -107,16 +108,21 @@ def search(pattern: str, line: str, case_sensitive: bool = False):
     line : str
         Searched text
 
+    case_sensitive : bool
+        If True then ignore case distinctions in patterns and data
+
     --------
     Returns:
         str: If the pattern was found, return line with red-colored pattern.
     """
 
+    regular = True if pattern[0] == '[' and pattern[-1] == ']' else False
+
     result = re.search(pattern, line, re.IGNORECASE) if case_sensitive else re.search(pattern, line)
     if result is not None:
         positions = re.finditer(pattern, line, re.IGNORECASE) if case_sensitive else re.finditer(pattern, line)
         positions = [m.start() for m in positions]
-        pattern_length = len(pattern) if len(positions) == 1 else 1
+        pattern_length = 1 if regular else len(pattern)
         index = 0
         output = ''
         for position in positions:
