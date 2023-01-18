@@ -34,11 +34,17 @@ def parse_args():
         help='Ignore case distinctions in patterns and data'
     )
 
+    parser.add_argument(
+        '-x',
+        '--extensions',
+        help='File extension(s) to search for. Every extension is given after comma. eg. txt,php'
+    )
+
     args = parser.parse_args()
     return args
 
 
-def get_dirlist(directory: str, hidden: int = 0):
+def get_dirlist(directory: str, hidden: int = 0, extensions: str = None):
     """
     Get all filenames in given directory
 
@@ -47,6 +53,9 @@ def get_dirlist(directory: str, hidden: int = 0):
     directory: str
         Path to the directory to search.
 
+    extensions: str
+        List of file extensions to exclude.
+
     --------
     Returns:
         list: All paths to files in a given directory and subdirectories recursively
@@ -54,7 +63,7 @@ def get_dirlist(directory: str, hidden: int = 0):
 
     path = os.path.abspath(directory)
     dir_list = []
-
+    extensions = extensions.split(',') if extensions is not None else []
     if os.path.isdir(path):
         for root, currentDirectory, files in os.walk(path):
             for file in files:
@@ -64,6 +73,15 @@ def get_dirlist(directory: str, hidden: int = 0):
                     dir_list.remove(result)
     else:
         dir_list.append(path)
+
+    directory_list = []
+
+    for extension in extensions:
+        for path in dir_list:
+            if not path.endswith(extension):
+                directory_list.append(path)
+
+    dir_list = directory_list if len(extensions) > 0 else dir_list
 
     return dir_list
 
@@ -151,7 +169,7 @@ def is_hidden(file_path: str):
 
 def main():
     parser = parse_args()
-    dirlist = get_dirlist(parser.dir)
+    dirlist = get_dirlist(directory=parser.dir, extensions=parser.extensions)
     for path in dirlist:
         file = string_file(path)
         output = []
