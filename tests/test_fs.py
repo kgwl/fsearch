@@ -109,3 +109,12 @@ class TestFSearch(TestCase):
     def test_is_hidden_true(self):
         path = '/home/.foo/test.txt'
         self.assertTrue(fs.is_hidden(path))
+
+    def test_get_path_level(self):
+        root_path = '/home/test'
+        child_path_1 = '/home/test/test1/test2/test3'
+        child_path_2 = '/home/test/test1/test2/test3/test4/test5/test6/test7/test8/test9/test10'
+        result_1 = fs.get_path_level(root_path, child_path_1)
+        result_2 = fs.get_path_level(root_path, child_path_2)
+        self.assertEqual(result_1, 3)
+        self.assertEqual(result_2, 10)

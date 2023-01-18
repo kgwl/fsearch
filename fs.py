@@ -167,6 +167,26 @@ def is_hidden(file_path: str):
     return re.search('/\.', file_path) is not None
 
 
+def get_path_level(root_path: str, child_path: str):
+    """
+    Counts how many directories are between two paths with the same root.
+
+    Parameters:
+    ----------
+    root_path: str
+        Starting path
+
+    child_path: str
+        The final path between which the number of directories will be counted
+
+    Returns:
+        int: Number of paths between starting path and final path.
+    """
+    path = child_path[0 + len(root_path): -1]
+    slashes = re.finditer('/', path)
+    return len([slash.start() for slash in slashes])
+
+
 def main():
     parser = parse_args()
     dirlist = get_dirlist(directory=parser.dir, extensions=parser.extensions)
