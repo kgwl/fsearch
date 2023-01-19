@@ -47,11 +47,18 @@ def parse_args():
         help='Descend only level directories deep'
     )
 
+    parser.add_argument(
+        '-n',
+        '--hidden',
+        action='store_true',
+        help='Include hidden files and directories'
+    )
+
     args = parser.parse_args()
     return args
 
 
-def get_dirlist(directory: str, hidden: int = 0, extensions: str = None, level: int = -1):
+def get_dirlist(directory: str, hidden: bool = False, extensions: str = None, level: int = -1):
     """
     Get all filenames in given directory
 
@@ -60,8 +67,15 @@ def get_dirlist(directory: str, hidden: int = 0, extensions: str = None, level: 
     directory: str
         Path to the directory to search.
 
+    hidden: bool
+        Include hidden files in output
+
     extensions: str
         List of file extensions to exclude.
+
+    level: int
+        Descend only level directories deep
+
 
     --------
     Returns:
@@ -78,7 +92,7 @@ def get_dirlist(directory: str, hidden: int = 0, extensions: str = None, level: 
                 path_level = get_path_level(path, result)
                 if path_level <= level or level == -1:
                     dir_list.append(result)
-                    if is_hidden(result) and hidden == 0:
+                    if is_hidden(result) and not hidden:
                         dir_list.remove(result)
     else:
         dir_list.append(path)
@@ -198,7 +212,7 @@ def get_path_level(root_path: str, child_path: str):
 
 def main():
     parser = parse_args()
-    dirlist = get_dirlist(directory=parser.dir, extensions=parser.extensions, level=int(parser.level))
+    dirlist = get_dirlist(directory=parser.dir, hidden=parser.hidden, extensions=parser.extensions, level=int(parser.level))
     for path in dirlist:
         file = string_file(path)
         output = []

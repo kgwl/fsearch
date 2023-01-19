@@ -109,6 +109,12 @@ class TestFSearch(TestCase):
         # length should be equal of all files in tests/ directory
         self.assertEqual(len(dirlist), 1)
 
+    def test_get_dirlist_hidden(self):
+        path = os.path.join(os.path.dirname(__file__), 'test_input_files')
+        filename = path + '/.test_hidden.txt'
+        dir_list = fs.get_dirlist(path, hidden=True)
+        self.assertTrue(filename in dir_list)
+
     def test_is_hidden_false(self):
         path = '/home/foo/test.txt'
         self.assertFalse(fs.is_hidden(path))
