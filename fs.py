@@ -40,11 +40,18 @@ def parse_args():
         help='File extension(s) to search for. Every extension is given after comma. eg. txt,php'
     )
 
+    parser.add_argument(
+        '-l',
+        '--level',
+        default=-1,
+        help='Descend only level directories deep'
+    )
+
     args = parser.parse_args()
     return args
 
 
-def get_dirlist(directory: str, hidden: int = 0, extensions: str = None):
+def get_dirlist(directory: str, hidden: int = 0, extensions: str = None, level: int = -1):
     """
     Get all filenames in given directory
 
@@ -68,9 +75,11 @@ def get_dirlist(directory: str, hidden: int = 0, extensions: str = None):
         for root, currentDirectory, files in os.walk(path):
             for file in files:
                 result = os.path.join(root, file)
-                dir_list.append(result)
-                if is_hidden(result) and hidden == 0:
-                    dir_list.remove(result)
+                path_level = get_path_level(path, result)
+                if path_level <= level or level == -1:
+                    dir_list.append(result)
+                    if is_hidden(result) and hidden == 0:
+                        dir_list.remove(result)
     else:
         dir_list.append(path)
 
@@ -189,7 +198,7 @@ def get_path_level(root_path: str, child_path: str):
 
 def main():
     parser = parse_args()
-    dirlist = get_dirlist(directory=parser.dir, extensions=parser.extensions)
+    dirlist = get_dirlist(directory=parser.dir, extensions=parser.extensions, level=int(parser.level))
     for path in dirlist:
         file = string_file(path)
         output = []
