@@ -2,6 +2,7 @@ import os
 from unittest import TestCase
 from unittest.mock import patch
 import fs
+import pandas as pd
 
 
 def search_case_sensitive(switch):
@@ -131,3 +132,15 @@ class TestFSearch(TestCase):
         result_2 = fs.get_path_level(root_path, child_path_2)
         self.assertEqual(result_1, 3)
         self.assertEqual(result_2, 10)
+
+    def test_simple_analyse(self):
+        path = 'test_input_files/test_simple_analyse.txt'
+        dir_name = fs.get_dirlist(path)
+        base_dir = dir_name[0][0: len(dir_name) - len(path) - 1]
+
+        data = [['test_input_files/test_simple_analyse.txt', 4, 17]]
+
+        expected_df = pd.DataFrame(data, columns=["Path", "Lines", "Size"])
+        an = fs.simple_analyse(dir_name, base_dir)
+
+        pd.testing.assert_frame_equal(an, expected_df)

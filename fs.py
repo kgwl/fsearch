@@ -1,6 +1,7 @@
 import os
 import argparse
 import re
+import pandas as pd
 
 
 def parse_args():
@@ -173,6 +174,37 @@ def search(pattern: str, line: str, case_sensitive: bool = False):
         return output
 
 
+def simple_analyse(dirlist: list, base_dir: str):
+    """
+    Returns basic information about file in pandas table format
+
+    Parameters:
+    ----------
+    dirlist: list
+        List of full paths of files to read
+
+    base_dir: str
+        A root of the path that is common to all
+
+    --------
+    Returns:
+        pandas.DataFrame: Table with basic information of the file
+
+    """
+    data = []
+    for path in dirlist:
+        file = open(path, 'r')
+        count = 0
+        for _ in file:
+            count += 1
+        data.append([path[len(base_dir): len(path)], count, os.path.getsize(path)])
+        file.close()
+
+    df = pd.DataFrame(data, columns=["Path", "Lines", "Size"])
+
+    return df
+
+
 def is_hidden(file_path: str):
     """
     Checks if the given directory or file is hidden. Function searches if the given path contains files with prefix '.'
@@ -211,20 +243,17 @@ def get_path_level(root_path: str, child_path: str):
 
 
 def main():
-    parser = parse_args()
-    dirlist = get_dirlist(directory=parser.dir, hidden=parser.hidden, extensions=parser.extensions, level=int(parser.level))
-    for path in dirlist:
-        file = string_file(path)
-        output = []
-        for line in file:
-            result = search(parser.pattern, line, parser.ignore)
-            if result is not None:
-                output.append(result)
 
-        if len(output) > 0:
-            print('\033[93m' + '\33[1m' + path + '\033[0m')
-        for line in output:
-            print('     ', line)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_colwidth', None)
+
+    parser = parse_args()
+
+    dirlist = get_dirlist(directory=parser.dir, hidden=parser.hidden, extensions=parser.extensions, level=int(parser.level))
+    data = simple_analyse(dirlist, parser.dir)
+    print(data)
 
 
 if __name__ == '__main__':
