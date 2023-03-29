@@ -7,7 +7,7 @@ import pandas as pd
 
 def search_case_sensitive(switch):
     path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_case_sensitive.txt')
-    dirlist = fs.get_dirlist(path)
+    dirlist = fs.get_filelist(path)
     file = fs.string_file(dirlist[0])
     pattern = 'test'
     cnt_lines = 0
@@ -68,7 +68,7 @@ class TestFSearch(TestCase):
 
     def test_search_regular_expressions(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_case_sensitive.txt')
-        dirlist = fs.get_dirlist(path)
+        dirlist = fs.get_filelist(path)
         file = fs.string_file(dirlist[0])
         pattern = '[1-5]'
         expected_output_line_1 = b'test\x1b[91m1\x1b[0m\x1b[91m2\x1b[0m\x1b[91m3\x1b[0m'.decode('utf-8')
@@ -80,40 +80,40 @@ class TestFSearch(TestCase):
 
     @patch('os.walk')
     def test_get_dirlist_walk_call(self, mock_system):
-        fs.get_dirlist('.')
+        fs.get_filelist('.')
         mock_system.assert_called()
 
     @patch('os.path.abspath')
     def test_get_dirlist_path_call(self, mock_system):
-        fs.get_dirlist('.')
+        fs.get_filelist('.')
         mock_system.assert_called()
 
     def test_get_dirlist_single_file(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_fsearch_input.txt')
-        dirlist = fs.get_dirlist(path)
+        dirlist = fs.get_filelist(path)
         self.assertEqual(dirlist[0], path)
 
     def test_get_dirlist_output(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files')
-        dirlist = fs.get_dirlist(path)
+        dirlist = fs.get_filelist(path)
         self.assertEqual(type(dirlist), list)
 
     def test_get_dirlist_exclude(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files')
-        dirlist = fs.get_dirlist(path, extensions='txt')
+        dirlist = fs.get_filelist(path, extensions='txt')
         self.assertEqual(len(dirlist), 1)
 
     def test_get_dirlist_level(self):
         path = os.path.join(os.path.dirname(__file__), '.')
         lv = 1
-        dirlist = fs.get_dirlist(path, level=lv)
+        dirlist = fs.get_filelist(path, level=lv)
         # length should be equal of all files in tests/ directory
         self.assertEqual(len(dirlist), 1)
 
     def test_get_dirlist_hidden(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files')
         filename = path + '/.test_hidden.txt'
-        dir_list = fs.get_dirlist(path, hidden=True)
+        dir_list = fs.get_filelist(path, hidden=True)
         self.assertTrue(filename in dir_list)
 
     def test_is_hidden_false(self):
@@ -135,7 +135,7 @@ class TestFSearch(TestCase):
 
     def test_simple_analyse(self):
         path = 'test_input_files/test_simple_analyse.txt'
-        dir_name = fs.get_dirlist(path)
+        dir_name = fs.get_filelist(path)
         base_dir = dir_name[0][0: len(dir_name) - len(path) - 1]
 
         data = [['test_input_files/test_simple_analyse.txt', 4, 17]]

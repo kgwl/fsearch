@@ -4,7 +4,7 @@ import re
 import pandas as pd
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """
     Parse command line arguments
 
@@ -14,7 +14,7 @@ def parse_args():
     """
 
     parser = argparse.ArgumentParser(
-        description='Search string in all files in directory'
+        description='Searches for a given string in all files in a directory and its subdirectories.'
     )
     parser.add_argument(
         '-d',
@@ -45,6 +45,7 @@ def parse_args():
         '-l',
         '--level',
         default=-1,
+        type=int,
         help='Descend only level directories deep'
     )
 
@@ -59,7 +60,7 @@ def parse_args():
     return args
 
 
-def get_dirlist(directory: str, hidden: bool = False, extensions: str = None, level: int = -1):
+def get_filelist(directory: str, hidden: bool = False, extensions: str = None, level: int = -1):
     """
     Get all filenames in given directory
 
@@ -84,30 +85,30 @@ def get_dirlist(directory: str, hidden: bool = False, extensions: str = None, le
     """
 
     path = os.path.abspath(directory)
-    dir_list = []
+    file_list = []
     extensions = extensions.split(',') if extensions is not None else []
     if os.path.isdir(path):
         for root, currentDirectory, files in os.walk(path):
-            for file in files:
-                result = os.path.join(root, file)
+            for m_file in files:
+                result = os.path.join(root, m_file)
                 path_level = get_path_level(path, result)
                 if path_level <= level or level == -1:
-                    dir_list.append(result)
+                    file_list.append(result)
                     if is_hidden(result) and not hidden:
-                        dir_list.remove(result)
+                        file_list.remove(result)
     else:
-        dir_list.append(path)
+        file_list.append(path)
 
-    directory_list = []
+    files = []
 
     for extension in extensions:
-        for path in dir_list:
-            if not path.endswith(extension):
-                directory_list.append(path)
+        for path in file_list:
+            if not path.endswith(extension) and path not in files:
+                files.append(path)
 
-    dir_list = directory_list if len(extensions) > 0 else dir_list
+    file_list = files if len(extensions) > 0 else file_list
 
-    return dir_list
+    return file_list
 
 
 def string_file(path: str):
@@ -138,7 +139,7 @@ def string_file(path: str):
     return output
 
 
-def search(pattern: str, line: str, case_sensitive: bool = False):
+def search(pattern: str, line: str, case_sensitive: bool = False) -> str:
     """
     Returns line that contains given pattern. By default, the search pattern is displayed in red
 
@@ -193,12 +194,12 @@ def simple_analyse(dirlist: list, base_dir: str):
     """
     data = []
     for path in dirlist:
-        file = open(path, 'r')
+        m_file = open(path, 'r')
         count = 0
-        for _ in file:
+        for _ in m_file:
             count += 1
         data.append([path[len(base_dir): len(path)], count, os.path.getsize(path)])
-        file.close()
+        m_file.close()
 
     df = pd.DataFrame(data, columns=["Path", "Lines", "Size"])
 
@@ -251,7 +252,7 @@ def main():
 
     parser = parse_args()
 
-    dirlist = get_dirlist(directory=parser.dir, hidden=parser.hidden, extensions=parser.extensions, level=int(parser.level))
+    dirlist = get_filelist(directory=parser.dir, hidden=parser.hidden, extensions=parser.extensions, level=int(parser.level))
     data = simple_analyse(dirlist, parser.dir)
     print(data)
 
