@@ -12,7 +12,7 @@ def search_case_sensitive(switch):
     pattern = 'test'
     cnt_lines = 0
     for line in file:
-        result = fs.search(pattern, line, switch)
+        result = fs.search(pattern=pattern, line=line, case_sensitive=switch)
         if result is not None:
             cnt_lines += 1
     return cnt_lines
@@ -61,10 +61,10 @@ class TestFSearch(TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_search_case_sensitive_false(self):
-        self.assertEqual(search_case_sensitive(False), 1)
+        self.assertEqual(search_case_sensitive(False), 2)
 
     def test_search_case_sensitive_true(self):
-        self.assertEqual(search_case_sensitive(True), 2)
+        self.assertEqual(search_case_sensitive(True), 1)
 
     def test_search_regular_expressions(self):
         path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_case_sensitive.txt')
@@ -138,9 +138,8 @@ class TestFSearch(TestCase):
         dir_name = fs.get_filelist(path)
         base_dir = dir_name[0][0: len(dir_name) - len(path) - 1]
 
-        data = [['test_input_files/test_simple_analyse.txt', 4, 17]]
-
-        expected_df = pd.DataFrame(data, columns=["Path", "Lines", "Size"])
+        data = [[dir_name[0], 'test_input_files/test_simple_analyse.txt', 4, 17]]
+        expected_df = pd.DataFrame(data, columns=['Full_Path', 'Path', 'Lines', 'Size'])
         an = fs.simple_analyse(dir_name, base_dir)
 
         pd.testing.assert_frame_equal(an, expected_df)

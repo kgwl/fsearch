@@ -56,6 +56,14 @@ def parse_args() -> argparse.Namespace:
         help='Include hidden files and directories'
     )
 
+    parser.add_argument(
+        '-m',
+        default='simple',
+        dest='mode',
+        choices=['simple', 'full'],
+        help='File analysis mode'
+    )
+
     args = parser.parse_args()
     return args
 
@@ -139,7 +147,7 @@ def string_file(path: str):
     return output
 
 
-def search(pattern: str, line: str, case_sensitive: bool = False) -> str:
+def search(pattern: str, line: str, case_sensitive: bool = False, return_mode: int = 0):
     """
     Returns line that contains given pattern. By default, the search pattern is displayed in red
 
@@ -160,50 +168,24 @@ def search(pattern: str, line: str, case_sensitive: bool = False) -> str:
     """
 
     regular = True if pattern[0] == '[' and pattern[-1] == ']' else False
+    result = re.search(pattern, line) if case_sensitive else re.search(pattern, line, re.IGNORECASE)
 
-    result = re.search(pattern, line, re.IGNORECASE) if case_sensitive else re.search(pattern, line)
     if result is not None:
-        positions = re.finditer(pattern, line, re.IGNORECASE) if case_sensitive else re.finditer(pattern, line)
+        positions = re.finditer(pattern, line) if case_sensitive else re.finditer(pattern, line, re.IGNORECASE)
         positions = [m.start() for m in positions]
         pattern_length = 1 if regular else len(pattern)
         index = 0
         output = ''
+        cnt = 0
         for position in positions:
             output += line[index: position] + '\033[91m' + line[position: position + pattern_length] + '\033[0m'
             index = position + pattern_length
+            cnt += 1
         output += line[index:]
-        return output
-
-
-def simple_analyse(dirlist: list, base_dir: str):
-    """
-    Returns basic information about file in pandas table format
-
-    Parameters:
-    ----------
-    dirlist: list
-        List of full paths of files to read
-
-    base_dir: str
-        A root of the path that is common to all
-
-    --------
-    Returns:
-        pandas.DataFrame: Table with basic information of the file
-
-    """
-    data = []
-    for path in dirlist:
-        m_file = open(path, 'r')
-        count = 0
-        for _ in m_file:
-            count += 1
-        data.append([path[len(base_dir): len(path)], count, os.path.getsize(path)])
-        m_file.close()
-
-    df = pd.DataFrame(data, columns=["Path", "Lines", "Size"])
-
-    return df
+        if return_mode == 0:
+            return output
+        elif return_mode == 1:
+            return cnt
 
 
 def is_hidden(file_path: str):
@@ -243,6 +225,63 @@ def get_path_level(root_path: str, child_path: str):
     return len([slash.start() for slash in slashes])
 
 
+def simple_analyse(dirlist: list, base_dir: str):
+    """
+    Returns basic information about file in pandas table format
+
+    Parameters:
+    ----------
+    dirlist: list
+        List of full paths of files to read
+
+    base_dir: str
+        A root of the path that is common to all
+
+    --------
+    Returns:
+        pandas.DataFrame: Table with basic information of the file
+
+    """
+    data = []
+    for path in dirlist:
+        m_file = open(path, 'r')
+        count = 0
+        for _ in m_file:
+            count += 1
+        data.append([path, path[len(base_dir): len(path)], count, os.path.getsize(path)])
+        m_file.close()
+
+    df = pd.DataFrame(data, columns=['Full_Path', 'Path', 'Lines', 'Size'])
+
+    return df
+
+
+def simple_find(parser, data):
+    for x in data['Full_Path']:
+        f = string_file(x)
+        result = 0
+        for line in f:
+            r = search(pattern=parser.pattern, line=line, return_mode=parser.mode, case_sensitive=parser.ignore)
+            result += r if r is not None else 0
+        mask = data['Full_Path'] == x
+        data.loc[mask, 'Found'] = result
+
+
+def full_find(parser, data):
+    for path in data['Full_Path']:
+        f = string_file(path)
+        output = []
+        for line in f:
+            result = search(pattern=parser.pattern, line=line, return_mode=parser.mode, case_sensitive=parser.ignore)
+            if result is not None:
+                output.append(result)
+
+        if len(output) > 0:
+            print('\033[93m' + '\33[1m' + path + '\033[0m')
+        for line in output:
+            print('     ', line)
+
+
 def main():
 
     pd.set_option('display.width', None)
@@ -252,9 +291,20 @@ def main():
 
     parser = parse_args()
 
+    parser.mode = 1 if parser.mode == 'simple' else 0
+
     dirlist = get_filelist(directory=parser.dir, hidden=parser.hidden, extensions=parser.extensions, level=int(parser.level))
+
     data = simple_analyse(dirlist, parser.dir)
-    print(data)
+
+    if parser.mode == 0:
+        full_find(parser, data)
+
+    elif parser.mode == 1:
+        data['Found'] = 0
+        simple_find(parser, data)
+        data = data.drop(columns='Full_Path')
+        print(data)
 
 
 if __name__ == '__main__':
