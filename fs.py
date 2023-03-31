@@ -18,8 +18,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         '-d',
-        '--dir',
         default='.',
+        dest='dir',
+        metavar='DIR',
         help='Path to the directory to search (default: %(default)s)'
     )
 
@@ -30,20 +31,22 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         '-i',
-        '--ignore',
+        dest='ignore',
         action='store_true',
         help='Ignore case distinctions in patterns and data'
     )
 
     parser.add_argument(
         '-x',
-        '--extensions',
-        help='File extension(s) to search for. Every extension is given after comma. eg. txt,php'
+        dest='extensions',
+        metavar='EXTENSION',
+        help='File extensions to search for. Every extension is given after comma. eg. txt,php'
     )
 
     parser.add_argument(
         '-l',
-        '--level',
+        dest='level',
+        metavar='LEVEL',
         default=-1,
         type=int,
         help='Descend only level directories deep'
@@ -51,7 +54,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         '-n',
-        '--hidden',
+        dest='hidden',
         action='store_true',
         help='Include hidden files and directories'
     )
