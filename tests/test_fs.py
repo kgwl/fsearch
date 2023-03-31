@@ -4,6 +4,7 @@ from unittest.mock import patch
 import fs
 import pandas as pd
 import argparse
+from io import StringIO
 
 
 def search_case_sensitive(switch):
@@ -152,3 +153,11 @@ class TestFSearch(TestCase):
         expected_output = pd.DataFrame({'Full_Path': [self.dir_name], 'Path': [self.path], 'Lines': [4], 'Size': [17], 'Found': [2]})
         fs.simple_find(test_parser, self.data_frame)
         pd.testing.assert_frame_equal(self.data_frame, expected_output)
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_full_find(self, mock_stdout):
+        test_parser = argparse.Namespace(pattern='test', mode=0, ignore=False)
+        fs.full_find(test_parser, self.data_frame)
+        result = '\033[93m' + '\33[1m' + self.dir_name + '\033[0m'
+        result = result + '\n' + '      ' + '\033[91m' + 'test' + '\033[0m' + '\n' + '      ' + '\033[91m' + 'TEST' + '\033[0m' + '\n'
+        self.assertEqual(mock_stdout.getvalue(), result)
