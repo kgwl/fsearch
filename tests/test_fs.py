@@ -3,6 +3,7 @@ from unittest import TestCase
 from unittest.mock import patch
 import fs
 import pandas as pd
+import argparse
 
 
 def search_case_sensitive(switch):
@@ -23,6 +24,13 @@ class TestFSearch(TestCase):
     def setUp(self):
         self.path = os.path.join(os.path.dirname(__file__), 'test_input_files/test_fsearch_input.txt')
         self.output = fs.string_file(self.path)
+        self.path = 'test_input_files/test_simple_analyse.txt'
+        self.dir_list = fs.get_filelist(self.path)
+        self.base_dir = self.dir_list[0][0: len(self.dir_list) - len(self.path) - 1]
+        self.dir_name = self.dir_list[0]
+
+        data = [[self.dir_name, self.path, 4, 17]]
+        self.data_frame = pd.DataFrame(data, columns=['Full_Path', 'Path', 'Lines', 'Size'])
 
     def test_string_file_type(self):
         self.assertEqual(type(self.output), list)
@@ -134,12 +142,13 @@ class TestFSearch(TestCase):
         self.assertEqual(result_2, 10)
 
     def test_simple_analyse(self):
-        path = 'test_input_files/test_simple_analyse.txt'
-        dir_name = fs.get_filelist(path)
-        base_dir = dir_name[0][0: len(dir_name) - len(path) - 1]
 
-        data = [[dir_name[0], 'test_input_files/test_simple_analyse.txt', 4, 17]]
-        expected_df = pd.DataFrame(data, columns=['Full_Path', 'Path', 'Lines', 'Size'])
-        an = fs.simple_analyse(dir_name, base_dir)
+        an = fs.simple_analyse(self.dir_list, self.base_dir)
+        pd.testing.assert_frame_equal(an, self.data_frame)
 
-        pd.testing.assert_frame_equal(an, expected_df)
+    def test_simple_find(self):
+        self.data_frame['Found'] = 0
+        test_parser = argparse.Namespace(pattern='test', mode=1, ignore=False)
+        expected_output = pd.DataFrame({'Full_Path': [self.dir_name], 'Path': [self.path], 'Lines': [4], 'Size': [17], 'Found': [2]})
+        fs.simple_find(test_parser, self.data_frame)
+        pd.testing.assert_frame_equal(self.data_frame, expected_output)

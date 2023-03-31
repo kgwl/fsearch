@@ -257,6 +257,15 @@ def simple_analyse(dirlist: list, base_dir: str):
 
 
 def simple_find(parser, data):
+    """
+    Count instances of pattern in file and save to the table
+
+    Parameters:
+    ----------
+        parser: argparse.Namespace
+
+        data: pandas.DataFrame
+    """
     for x in data['Full_Path']:
         f = string_file(x)
         result = 0
@@ -268,6 +277,15 @@ def simple_find(parser, data):
 
 
 def full_find(parser, data):
+    """
+    Print all line if pattern was found.
+
+    Parameters:
+    ----------
+        parser: argparse.Namespace
+
+        data: pandas.DataFrame
+    """
     for path in data['Full_Path']:
         f = string_file(path)
         output = []
