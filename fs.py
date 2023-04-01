@@ -4,7 +4,7 @@ import re
 import pandas as pd
 
 
-def parse_args() -> argparse.Namespace:
+def get_parser() -> argparse.ArgumentParser:
     """
     Parse command line arguments
 
@@ -14,6 +14,7 @@ def parse_args() -> argparse.Namespace:
     """
 
     parser = argparse.ArgumentParser(
+        prog='fsearch',
         description='Searches for a given string in all files in a directory and its subdirectories.'
     )
     parser.add_argument(
@@ -25,7 +26,9 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        'pattern',
+        '-p',
+        dest='pattern',
+        metavar='PATTERN',
         help='Pattern that is looked for'
     )
 
@@ -67,8 +70,15 @@ def parse_args() -> argparse.Namespace:
         help='File analysis mode'
     )
 
-    args = parser.parse_args()
-    return args
+    parser.add_argument(
+        '-w',
+        default=None,
+        dest='wordlist',
+        metavar='WORDLIST',
+        help='Wordlist of patterns to find'
+    )
+
+    return parser
 
 
 def get_filelist(directory: str, hidden: bool = False, extensions: str = None, level: int = -1):
@@ -303,6 +313,18 @@ def full_find(parser, data):
             print('     ', line)
 
 
+def get_args():
+    parser = get_parser()
+    p_args = parser.parse_args()
+
+    if p_args.pattern is not None and p_args.wordlist is not None:
+        parser.error('You cannot pass [-p PATTERN] and [-w WORDLIST] arguments together')
+
+    p_args.mode = 1 if p_args.mode == 'simple' else 0
+
+    return p_args
+
+
 def main():
 
     pd.set_option('display.width', None)
@@ -310,22 +332,20 @@ def main():
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_colwidth', None)
 
-    parser = parse_args()
+    p_args = get_args()
 
-    parser.mode = 1 if parser.mode == 'simple' else 0
+    dirlist = get_filelist(directory=p_args.dir, hidden=p_args.hidden, extensions=p_args.extensions, level=int(p_args.level))
 
-    dirlist = get_filelist(directory=parser.dir, hidden=parser.hidden, extensions=parser.extensions, level=int(parser.level))
+    data = simple_analyse(dirlist, p_args.dir)
 
-    data = simple_analyse(dirlist, parser.dir)
-
-    if parser.mode == 0:
-        full_find(parser, data)
-
-    elif parser.mode == 1:
-        data['Found'] = 0
-        simple_find(parser, data)
-        data = data.drop(columns='Full_Path')
-        print(data)
+    if p_args.wordlist is None:
+        if p_args.mode == 0:
+            full_find(p_args, data)
+        elif p_args.mode == 1:
+            data['Found'] = 0
+            simple_find(p_args, data)
+            data = data.drop(columns='Full_Path')
+            print(data)
 
 
 if __name__ == '__main__':

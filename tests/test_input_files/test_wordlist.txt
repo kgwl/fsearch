@@ -1,0 +1,10 @@
+test1
+password
+admin
+xxx
+qwerty
+12345
+ubuntu
+dragon
+flower
+!@#$%^&*()
