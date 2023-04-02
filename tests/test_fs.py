@@ -165,3 +165,5 @@ class TestFSearch(TestCase):
         pattern = 'password|test|123|dragon'
         line = 'password 64646 test gdgd 123 xxxx dragon ogferowg'
         result = fs.search(pattern, line)
+        expected_output = b'\x1b[91mpassword\x1b[0m 64646 \x1b[91mtest\x1b[0m gdgd \x1b[91m123\x1b[0m xxxx \x1b[91mdragon\x1b[0m ogferowg'.decode('utf-8')
+        self.assertEqual(result, expected_output)

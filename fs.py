@@ -361,19 +361,21 @@ def main():
             data = data.drop(columns='Full_Path')
             print(data)
     else:
-        data['Matched'] = 0
-        data['%Matched'] = 0
         wordlist = get_wordlist(p_args.wordlist)
         list_length = len(wordlist)
         wordlist = '|'.join(wordlist)
+        p_args.pattern = wordlist
+        if p_args.mode == 0:
+            full_find(p_args, data)
+        elif p_args.mode == 1:
+            data['Matched'] = 0
+            data['%Matched'] = 0
 
-        if p_args.mode == 1:
-            p_args.pattern = wordlist
             simple_find(p_args, data, list_length)
 
-        data = data.drop(columns='Full_Path')
-        data['%Matched'] = ['{:.2%}'.format(x) for x in list(data['%Matched'])]
-        print(data)
+            data = data.drop(columns='Full_Path')
+            data['%Matched'] = ['{:.2%}'.format(x) for x in list(data['%Matched'])]
+            print(data)
 
 
 if __name__ == '__main__':
