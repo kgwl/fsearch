@@ -27,7 +27,7 @@ class TestFSearch(TestCase):
         self.output = fs.string_file(self.path)
         self.path = 'test_input_files/test_simple_analyse.txt'
         self.dir_list = fs.get_filelist(self.path)
-        self.base_dir = self.dir_list[0][0: len(self.dir_list) - len(self.path) - 1]
+        self.base_dir = self.dir_list[0][0: len(self.dir_list[0]) - len(self.path) - 1]
         self.dir_name = self.dir_list[0]
 
         data = [[self.dir_name, self.path, 4, 17]]
@@ -143,8 +143,13 @@ class TestFSearch(TestCase):
         self.assertEqual(result_2, 10)
 
     def test_simple_analyse(self):
+        pd.set_option('display.width', None)
+        pd.set_option('display.max_rows', None)
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_colwidth', None)
 
         an = fs.simple_analyse(self.dir_list, self.base_dir)
+        print(self.data_frame)
         pd.testing.assert_frame_equal(an, self.data_frame)
 
     def test_simple_find(self):

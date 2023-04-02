@@ -255,13 +255,14 @@ def simple_analyse(dirlist: list, base_dir: str):
         pandas.DataFrame: Table with basic information of the file
 
     """
+
     data = []
     for path in dirlist:
         m_file = open(path, 'r')
         count = 0
         for _ in m_file:
             count += 1
-        data.append([path, path[len(base_dir): len(path)], count, os.path.getsize(path)])
+        data.append([path, path[len(path) - len(base_dir): len(path)], count, os.path.getsize(path)])
         m_file.close()
 
     df = pd.DataFrame(data, columns=['Full_Path', 'Path', 'Lines', 'Size'])
@@ -269,7 +270,7 @@ def simple_analyse(dirlist: list, base_dir: str):
     return df
 
 
-def simple_find(parser, data):
+def simple_find(parser, data, list_length: int = None):
     """
     Count instances of pattern in file and save to the table
 
@@ -278,7 +279,12 @@ def simple_find(parser, data):
         parser: argparse.Namespace
 
         data: pandas.DataFrame
+
+        list_length: number:
+            Length of the wordlist
+
     """
+
     for x in data['Full_Path']:
         f = string_file(x)
         result = 0
@@ -286,7 +292,11 @@ def simple_find(parser, data):
             r = search(pattern=parser.pattern, line=line, return_mode=parser.mode, case_sensitive=parser.ignore)
             result += r if r is not None else 0
         mask = data['Full_Path'] == x
-        data.loc[mask, 'Found'] = result
+        data.loc[mask, 'Found'] += result
+
+        if list_length is not None:
+            data.loc[mask, 'Matched'] += 1 if result > 0 else 0
+            data.loc[mask, '%Matched'] = data['Matched']/list_length
 
 
 def full_find(parser, data):
@@ -316,13 +326,25 @@ def full_find(parser, data):
 def get_args():
     parser = get_parser()
     p_args = parser.parse_args()
-
     if p_args.pattern is not None and p_args.wordlist is not None:
         parser.error('You cannot pass [-p PATTERN] and [-w WORDLIST] arguments together')
 
     p_args.mode = 1 if p_args.mode == 'simple' else 0
 
     return p_args
+
+
+def get_wordlist(path: str):
+    path = os.path.abspath(path)
+    result = []
+    wordlist = open(path, 'r')
+
+    for line in wordlist.readlines():
+        result.append(line.strip())
+
+    wordlist.close()
+
+    return result
 
 
 def main():
@@ -337,15 +359,27 @@ def main():
     dirlist = get_filelist(directory=p_args.dir, hidden=p_args.hidden, extensions=p_args.extensions, level=int(p_args.level))
 
     data = simple_analyse(dirlist, p_args.dir)
+    data['Found'] = 0
 
     if p_args.wordlist is None:
         if p_args.mode == 0:
             full_find(p_args, data)
         elif p_args.mode == 1:
-            data['Found'] = 0
             simple_find(p_args, data)
-            data = data.drop(columns='Full_Path')
             print(data)
+    else:
+        data['Matched'] = 0
+        data['%Matched'] = 0
+        wordlist = get_wordlist(p_args.wordlist)
+        list_length = len(wordlist)
+        for word in wordlist:
+            if p_args.mode == 1:
+                p_args.pattern = word
+                simple_find(p_args, data, list_length)
+
+        data = data.drop(columns='Full_Path')
+        data['%Matched'] = ['{:.2%}'.format(x) for x in list(data['%Matched'])]
+        print(data)
 
 
 if __name__ == '__main__':
