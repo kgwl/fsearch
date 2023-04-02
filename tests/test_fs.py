@@ -143,13 +143,7 @@ class TestFSearch(TestCase):
         self.assertEqual(result_2, 10)
 
     def test_simple_analyse(self):
-        pd.set_option('display.width', None)
-        pd.set_option('display.max_rows', None)
-        pd.set_option('display.max_columns', None)
-        pd.set_option('display.max_colwidth', None)
-
         an = fs.simple_analyse(self.dir_list, self.base_dir)
-        print(self.data_frame)
         pd.testing.assert_frame_equal(an, self.data_frame)
 
     def test_simple_find(self):
@@ -166,3 +160,8 @@ class TestFSearch(TestCase):
         result = '\033[93m' + '\33[1m' + self.dir_name + '\033[0m'
         result = result + '\n' + '      ' + '\033[91m' + 'test' + '\033[0m' + '\n' + '      ' + '\033[91m' + 'TEST' + '\033[0m' + '\n'
         self.assertEqual(mock_stdout.getvalue(), result)
+
+    def test_search_many_matches(self):
+        pattern = 'password|test|123|dragon'
+        line = 'password 64646 test gdgd 123 xxxx dragon ogferowg'
+        result = fs.search(pattern, line)

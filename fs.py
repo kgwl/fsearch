@@ -180,25 +180,15 @@ def search(pattern: str, line: str, case_sensitive: bool = False, return_mode: i
         str: If the pattern was found, return line with red-colored pattern.
     """
 
-    regular = True if pattern[0] == '[' and pattern[-1] == ']' else False
     result = re.search(pattern, line) if case_sensitive else re.search(pattern, line, re.IGNORECASE)
 
     if result is not None:
-        positions = re.finditer(pattern, line) if case_sensitive else re.finditer(pattern, line, re.IGNORECASE)
-        positions = [m.start() for m in positions]
-        pattern_length = 1 if regular else len(pattern)
-        index = 0
-        output = ''
-        cnt = 0
-        for position in positions:
-            output += line[index: position] + '\033[91m' + line[position: position + pattern_length] + '\033[0m'
-            index = position + pattern_length
-            cnt += 1
-        output += line[index:]
+        highlight_text = lambda match: '\033[91m' + match.group() + '\033[0m'
+        matched = re.findall(pattern, line) if case_sensitive else re.findall(pattern, line, re.IGNORECASE)
         if return_mode == 0:
-            return output
+            return re.sub(pattern, highlight_text, line) if case_sensitive else re.sub(pattern, highlight_text, line, flags=re.IGNORECASE)
         elif return_mode == 1:
-            return cnt
+            return len(matched)
 
 
 def is_hidden(file_path: str):
@@ -282,7 +272,6 @@ def simple_find(parser, data, list_length: int = None):
 
         list_length: number:
             Length of the wordlist
-
     """
 
     for x in data['Full_Path']:
@@ -372,10 +361,11 @@ def main():
         data['%Matched'] = 0
         wordlist = get_wordlist(p_args.wordlist)
         list_length = len(wordlist)
-        for word in wordlist:
-            if p_args.mode == 1:
-                p_args.pattern = word
-                simple_find(p_args, data, list_length)
+        wordlist = '|'.join(wordlist)
+
+        if p_args.mode == 1:
+            p_args.pattern = wordlist
+            simple_find(p_args, data, list_length)
 
         data = data.drop(columns='Full_Path')
         data['%Matched'] = ['{:.2%}'.format(x) for x in list(data['%Matched'])]
