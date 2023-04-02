@@ -167,3 +167,20 @@ class TestFSearch(TestCase):
         result = fs.search(pattern, line)
         expected_output = b'\x1b[91mpassword\x1b[0m 64646 \x1b[91mtest\x1b[0m gdgd \x1b[91m123\x1b[0m xxxx \x1b[91mdragon\x1b[0m ogferowg'.decode('utf-8')
         self.assertEqual(result, expected_output)
+
+    def test_search_return_mode(self):
+        pattern = 'test'
+        line = 'test test test'
+        result = fs.search(pattern=pattern, line=line, return_mode=1)
+        self.assertEqual(type(result), list)
+        self.assertEqual(result[0], 3)
+        self.assertEqual(result[1], 1)
+
+    def test_simple_find_list_length(self):
+        self.data_frame['Found'] = 0
+        self.data_frame['Matched'] = 0
+        self.data_frame['%Matched'] = 0
+        test_parser = argparse.Namespace(pattern='123', mode=1, ignore=False)
+        expected_output = pd.DataFrame({'Full_Path': [self.dir_name], 'Path': [self.path], 'Lines': [4], 'Size': [17], 'Found': [2], 'Matched': 1, '%Matched': 0.25})
+        fs.simple_find(test_parser, self.data_frame, 4)
+        pd.testing.assert_frame_equal(self.data_frame, expected_output)

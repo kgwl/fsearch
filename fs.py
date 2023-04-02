@@ -190,7 +190,7 @@ def search(pattern: str, line: str, case_sensitive: bool = False, return_mode: i
         if return_mode == 0:
             return re.sub(pattern, highlight_text, line) if case_sensitive else re.sub(pattern, highlight_text, line, flags=re.IGNORECASE)
         elif return_mode == 1:
-            return len(matched), len(unique_matches)
+            return [len(matched), len(unique_matches)]
 
 
 def is_hidden(file_path: str):
