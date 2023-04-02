@@ -185,10 +185,12 @@ def search(pattern: str, line: str, case_sensitive: bool = False, return_mode: i
     if result is not None:
         highlight_text = lambda match: '\033[91m' + match.group() + '\033[0m'
         matched = re.findall(pattern, line) if case_sensitive else re.findall(pattern, line, re.IGNORECASE)
+        unique_matches = set(matched) if case_sensitive else set([uq.lower() for uq in set(matched)])
+
         if return_mode == 0:
             return re.sub(pattern, highlight_text, line) if case_sensitive else re.sub(pattern, highlight_text, line, flags=re.IGNORECASE)
         elif return_mode == 1:
-            return len(matched)
+            return len(matched), len(unique_matches)
 
 
 def is_hidden(file_path: str):
@@ -252,7 +254,7 @@ def simple_analyse(dirlist: list, base_dir: str):
         count = 0
         for _ in m_file:
             count += 1
-        data.append([path, path[len(path) - len(base_dir): len(path)], count, os.path.getsize(path)])
+        data.append([path, path[len(base_dir): len(path)], count, os.path.getsize(path)])
         m_file.close()
 
     df = pd.DataFrame(data, columns=['Full_Path', 'Path', 'Lines', 'Size'])
@@ -276,15 +278,16 @@ def simple_find(parser, data, list_length: int = None):
 
     for x in data['Full_Path']:
         f = string_file(x)
-        result = 0
-        for line in f:
-            r = search(pattern=parser.pattern, line=line, return_mode=parser.mode, case_sensitive=parser.ignore)
-            result += r if r is not None else 0
+        f = ''.join(f)
+        r = search(pattern=parser.pattern, line=f, return_mode=parser.mode, case_sensitive=parser.ignore)
+        result = r[0] if r is not None else 0
+        matched = r[1] if r is not None else 0
+
         mask = data['Full_Path'] == x
         data.loc[mask, 'Found'] += result
 
         if list_length is not None:
-            data.loc[mask, 'Matched'] += 1 if result > 0 else 0
+            data.loc[mask, 'Matched'] = matched
             data.loc[mask, '%Matched'] = data['Matched']/list_length
 
 
@@ -355,6 +358,7 @@ def main():
             full_find(p_args, data)
         elif p_args.mode == 1:
             simple_find(p_args, data)
+            data = data.drop(columns='Full_Path')
             print(data)
     else:
         data['Matched'] = 0

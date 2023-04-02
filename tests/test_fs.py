@@ -27,7 +27,7 @@ class TestFSearch(TestCase):
         self.output = fs.string_file(self.path)
         self.path = 'test_input_files/test_simple_analyse.txt'
         self.dir_list = fs.get_filelist(self.path)
-        self.base_dir = self.dir_list[0][0: len(self.dir_list[0]) - len(self.path) - 1]
+        self.base_dir = self.dir_list[0][0: len(self.dir_list) - len(self.path) - 1]
         self.dir_name = self.dir_list[0]
 
         data = [[self.dir_name, self.path, 4, 17]]
