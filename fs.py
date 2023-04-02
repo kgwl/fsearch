@@ -254,7 +254,10 @@ def simple_analyse(dirlist: list, base_dir: str):
         count = 0
         for _ in m_file:
             count += 1
-        data.append([path, path[len(base_dir): len(path)], count, os.path.getsize(path)])
+        full_dir = os.path.abspath(base_dir)
+        short_path = path[len(full_dir): len(path)][1:len(path)]
+
+        data.append([path, short_path, count, os.path.getsize(path)])
         m_file.close()
 
     df = pd.DataFrame(data, columns=['Full_Path', 'Path', 'Lines', 'Size'])
@@ -345,6 +348,7 @@ def main():
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_colwidth', None)
+    pd.set_option('display.colheader_justify', 'center')
 
     p_args = get_args()
 
@@ -358,8 +362,7 @@ def main():
             full_find(p_args, data)
         elif p_args.mode == 1:
             simple_find(p_args, data)
-            data = data.drop(columns='Full_Path')
-            print(data)
+
     else:
         wordlist = get_wordlist(p_args.wordlist)
         list_length = len(wordlist)
@@ -370,12 +373,14 @@ def main():
         elif p_args.mode == 1:
             data['Matched'] = 0
             data['%Matched'] = 0
-
             simple_find(p_args, data, list_length)
-
-            data = data.drop(columns='Full_Path')
             data['%Matched'] = ['{:.2%}'.format(x) for x in list(data['%Matched'])]
-            print(data)
+
+    if p_args.mode == 1:
+        data = data.drop(columns='Path')
+        max_length = data['Full_Path'].apply(len).max()
+        data['Full_Path'] = data['Full_Path'].apply(lambda x: x.ljust(max_length))
+        print(data)
 
 
 if __name__ == '__main__':
