@@ -78,6 +78,14 @@ def get_parser() -> argparse.ArgumentParser:
         help='Wordlist of patterns to find'
     )
 
+    parser.add_argument(
+        '-s',
+        default=False,
+        dest='single',
+        action='store_true',
+        help='Match full words'
+    )
+
     return parser
 
 
@@ -326,6 +334,9 @@ def get_args():
 
     p_args.mode = 1 if p_args.mode == 'simple' else 0
 
+    if p_args.single and p_args.pattern is not None:
+        p_args.pattern = r'\b' + p_args.pattern + r'\b'
+
     return p_args
 
 
@@ -365,6 +376,12 @@ def main():
 
     else:
         wordlist = get_wordlist(p_args.wordlist)
+
+        if p_args.single:
+            for i in range(len(wordlist)):
+                x = r'\b' + wordlist[i] + r'\b'
+                wordlist[i] = x
+
         list_length = len(wordlist)
         wordlist = '|'.join(wordlist)
         p_args.pattern = wordlist
