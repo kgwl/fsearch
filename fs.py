@@ -86,6 +86,14 @@ def get_parser() -> argparse.ArgumentParser:
         help='Match full words'
     )
 
+    parser.add_argument(
+        '--sort',
+        dest='sort_column',
+        nargs='?',
+        default='nosort',
+        help='Sort output by selected column'
+    )
+
     return parser
 
 
@@ -362,7 +370,6 @@ def main():
     pd.set_option('display.colheader_justify', 'center')
 
     p_args = get_args()
-
     dirlist = get_filelist(directory=p_args.dir, hidden=p_args.hidden, extensions=p_args.extensions, level=int(p_args.level))
 
     data = simple_analyse(dirlist, p_args.dir)
@@ -397,6 +404,21 @@ def main():
         data = data.drop(columns='Path')
         max_length = data['Full_Path'].apply(len).max()
         data['Full_Path'] = data['Full_Path'].apply(lambda x: x.ljust(max_length))
+
+        sort_column = p_args.sort_column
+        if sort_column != 'nosort':
+            sort_column = 'Found' if sort_column is None else sort_column
+            columns = sort_column.split(',')
+            try:
+                data = data.sort_values(by=columns, ascending=False)
+            except KeyError:
+                cols = []
+                for column in columns:
+                    if column not in data:
+                        cols.append(column)
+                cols = '[' + ','.join(cols) + ']'
+                print('\033[91m' + cols + ' Column does not exist' + '\033[0m')
+
         print(data)
 
 
