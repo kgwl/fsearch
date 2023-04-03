@@ -2,6 +2,14 @@
 
 Recursively search for a pattern in many files and directories. The default output is a table with statistics of the files.
 
+Installation:
+
+```
+git clone https://github.com/kgwl/fsearch
+
+pip3 install -r requirements.txt
+```
+
 
 Example usage:
 
